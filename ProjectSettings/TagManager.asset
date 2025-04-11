@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Environment
   - Ground
+  - Interact
   layers:
   - Default
   - TransparentFX
@@ -42,6 +43,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Ground
+    uniqueID: 2959653399
+    locked: 0
+  - name: Game
+    uniqueID: 2762951491
     locked: 0
   m_RenderingLayers:
   - Default

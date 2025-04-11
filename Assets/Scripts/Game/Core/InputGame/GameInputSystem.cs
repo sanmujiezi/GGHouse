@@ -1,18 +1,19 @@
-using System;
+using InputGame;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-namespace InputSystem
+namespace Game.Core.InputGame
 {
-    public class InputSystem : MonoBehaviour
+    public class GameInputSystem : MonoBehaviour
     {
-        private static InputSystem m_Instance;
-        public static InputSystem Instance => m_Instance;
+        private static GameInputSystem m_Instance;
+        public static GameInputSystem Instance => m_Instance;
 
-        public event Action OnStartMove;
-        public event Action OnStopMove;
+        public event UnityAction OnStartMove;
+        public event UnityAction OnStopMove;
 
-        private GameInput gameInput;
+        private Gameinput gameInput;
 
         private void OnEnable()
         {
@@ -30,7 +31,7 @@ namespace InputSystem
             
             DontDestroyOnLoad(this);
             
-            gameInput = new GameInput();
+            gameInput = new Gameinput();
             gameInput.KeyBoard.Move.started += OnStartInputMove;
             gameInput.KeyBoard.Move.canceled += OnStopInputMove;
         }
@@ -54,6 +55,12 @@ namespace InputSystem
         public Vector2 GetMoveVector2Normal()
         {
             return gameInput.KeyBoard.Move.ReadValue<Vector2>().normalized;
+        }
+
+        public bool PressInteractBtn()
+        {
+            var pressed = gameInput.KeyBoard.Interact.triggered;
+            return pressed;
         }
     }
 }
