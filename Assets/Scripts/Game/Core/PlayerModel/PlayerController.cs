@@ -18,12 +18,17 @@ namespace Game.Core.PlayerModel
 
         private bool m_flipX;
         private bool m_isRun;
-        private bool m_canMove;
+        private bool m_canMove = true;
 
         private Vector2 m_moveDir;
         private PlayerAnimatior m_animatior;
         private PlayerInteraction m_interaction;
         private PlayerEvnetor m_eventor;
+
+        private float startTime;
+        private float interactUpSpeed = 0.8f;
+        private float interactDownSpeed = 1.5f;
+        private GameObjectInteract interactObj;
 
         private void Awake()
         {
@@ -45,8 +50,35 @@ namespace Game.Core.PlayerModel
         private void Update()
         {
             m_animatior.SetIsRun(m_isRun);
-            m_interaction.Update();
-            m_canMove = !m_interaction.interacting;
+
+            if (interactObj && GameInputSystem.Instance.PressInteractBtn())
+            {
+                startTime += Time.deltaTime * interactUpSpeed;
+                if (startTime > 0 && startTime < 1)
+                {
+                    interactObj.SetProgress(startTime);
+                }
+                else
+                {
+                    startTime = 0;
+                    interactObj.Interact();
+                }
+
+                Debug.Log("input");
+            }
+            else if (interactObj && !GameInputSystem.Instance.PressInteractBtn())
+            {
+                if (startTime > 0)
+                {
+                    startTime -= Time.deltaTime * interactDownSpeed;
+                    interactObj.SetProgress(startTime);
+                }
+                else
+                {
+                    startTime = 0;
+                    interactObj.SetProgress(startTime);
+                }
+            }
         }
 
         private void FixedUpdate()
@@ -67,8 +99,8 @@ namespace Game.Core.PlayerModel
                 var obInteract = other.transform.parent.GetComponent<GameObjectInteract>();
                 if (obInteract)
                 {
-                    m_interaction.AddInteractList(obInteract);
-                    CheckInteractObj();
+                    obInteract.SetActiveWithUIInteract(true);
+                    interactObj = obInteract;
                 }
             }
         }
@@ -77,11 +109,11 @@ namespace Game.Core.PlayerModel
         {
             if (other.CompareTag("Interact"))
             {
-                var obInteract = other.transform.GetComponent<GameObjectInteract>();
+                var obInteract = other.transform.parent.GetComponent<GameObjectInteract>();
                 if (obInteract)
                 {
-                    m_interaction.RemoveInteractList(obInteract);
-                    CheckInteractObj();
+                    obInteract.SetActiveWithUIInteract(false);
+                    interactObj = null;
                 }
             }
         }
@@ -126,22 +158,6 @@ namespace Game.Core.PlayerModel
         public void SetHandPoint(GameObject target)
         {
             m_interaction.SetHandPoint(target);
-        }
-
-        private void CheckInteractObj()
-        {
-            if (m_interaction.IsStartInteractCheck())
-            {
-                StartCoroutine(m_interaction.SelectInteractObj());
-            }
-            else
-            {
-                if (m_interaction.selectedInteractObj)
-                {
-                    m_interaction.selectedInteractObj.SetActiveWithUIInteract(false);
-                }
-                StopCoroutine(m_interaction.SelectInteractObj());
-            }
         }
     }
 }

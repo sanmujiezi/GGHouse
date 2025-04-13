@@ -7,7 +7,7 @@ namespace Game.Core.GameInteract
         public override void Interact()
         {
             base.Interact();
-            PlayerController.Instance.SetHandPoint(gameObject);
+            //dPlayerController.Instance.SetHandPoint(gameObject);
         }
     }
 }

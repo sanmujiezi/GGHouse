@@ -1,3 +1,4 @@
+using Game.Core.PlayerModel;
 using InputGame;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,7 +10,6 @@ namespace Game.Core.InputGame
     {
         private static GameInputSystem m_Instance;
         public static GameInputSystem Instance => m_Instance;
-
         public event UnityAction OnStartMove;
         public event UnityAction OnStopMove;
 
@@ -56,10 +56,10 @@ namespace Game.Core.InputGame
         {
             return gameInput.KeyBoard.Move.ReadValue<Vector2>().normalized;
         }
-
+        
         public bool PressInteractBtn()
         {
-            var pressed = gameInput.KeyBoard.Interact.triggered;
+            var pressed = gameInput.KeyBoard.Interact.IsPressed();
             return pressed;
         }
     }
