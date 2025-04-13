@@ -18,6 +18,7 @@ namespace Game.Core.PlayerModel
 
         private bool m_flipX;
         private bool m_isRun;
+        private bool m_canMove;
 
         private Vector2 m_moveDir;
         private PlayerAnimatior m_animatior;
@@ -44,6 +45,8 @@ namespace Game.Core.PlayerModel
         private void Update()
         {
             m_animatior.SetIsRun(m_isRun);
+            m_interaction.Update();
+            m_canMove = !m_interaction.interacting;
         }
 
         private void FixedUpdate()
@@ -58,12 +61,14 @@ namespace Game.Core.PlayerModel
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            Debug.Log($"{other.name}");
             if (other.CompareTag("Interact"))
             {
-                var obInteract = other.transform.GetComponent<GameObjectInteract>();
+                var obInteract = other.transform.parent.GetComponent<GameObjectInteract>();
                 if (obInteract)
                 {
                     m_interaction.AddInteractList(obInteract);
+                    CheckInteractObj();
                 }
             }
         }
@@ -76,6 +81,7 @@ namespace Game.Core.PlayerModel
                 if (obInteract)
                 {
                     m_interaction.RemoveInteractList(obInteract);
+                    CheckInteractObj();
                 }
             }
         }
@@ -87,6 +93,11 @@ namespace Game.Core.PlayerModel
 
         private void Move()
         {
+            if (!m_canMove)
+            {
+                return;
+            }
+
             m_moveDir = GameInputSystem.Instance.GetMoveVector2Normal();
             m_isRun = m_moveDir != Vector2.zero;
             //DebugLogger.Instance.Log(this,$"{m_moveDir} {m_isRun}");
@@ -115,6 +126,22 @@ namespace Game.Core.PlayerModel
         public void SetHandPoint(GameObject target)
         {
             m_interaction.SetHandPoint(target);
+        }
+
+        private void CheckInteractObj()
+        {
+            if (m_interaction.IsStartInteractCheck())
+            {
+                StartCoroutine(m_interaction.SelectInteractObj());
+            }
+            else
+            {
+                if (m_interaction.selectedInteractObj)
+                {
+                    m_interaction.selectedInteractObj.SetActiveWithUIInteract(false);
+                }
+                StopCoroutine(m_interaction.SelectInteractObj());
+            }
         }
     }
 }
